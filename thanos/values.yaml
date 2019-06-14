@@ -58,7 +58,7 @@ tls:
     key: ""
   # server side
   server:
-    # certificate and key for client side authentication to stores
+    # certificate and key for server side authentication to stores
     crt: ""
     key: ""
     # (optional) server name indication to the stores (ref: https://tools.ietf.org/html/rfc4366#section-3.1)

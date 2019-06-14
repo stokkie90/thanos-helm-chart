@@ -11,10 +11,11 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/component: query
   annotations:
+    nginx.org/grpc-services: "{{ include "thanos.fullname" . }}-query-grpc"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-    nginx.ingress.kubernetes.io/auth-tls-secret: "{{ include "thanos.fullname" . }}-thanos-ca-secret"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "{{ .Release.Namespace }}/{{ include "thanos.fullname" . }}-thanos-ca-secret"
 spec:
   rules:
   - host: thanos-query.{{ .Values.query.ingress.domain }}
