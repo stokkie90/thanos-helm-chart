@@ -62,7 +62,7 @@ helm upgrade --install --namespace thanos thanos carlos/thanos -f values.yaml \
   --set-file tls.server.key=out/example.com.key \
   --set-file tls.client.crt=out/127.0.0.1.crt \
   --set-file tls.client.key=out/127.0.0.1.key \
-  --set-file tls.client.chain=out/Root_CA.crt \
+  --set-file tls.chain=out/Root_CA.crt \
   --set-file objectStore=thanos-storage-config.yaml
 ```
 
