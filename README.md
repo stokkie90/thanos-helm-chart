@@ -30,27 +30,43 @@ You'll need a thanos storage config yaml file, as per
 Then craete a `thanos-storage-config.yaml` file based on the provided
 `thanos-storage-config.yaml.example`.
 
-#### 3. Values file
+#### 3. TLS (optional)
+
+```sh
+certstrap init --common-name "Root CA"
+certstrap request-cert --domain example.com
+certstrap sign --CA "Root CA" example.com
+
+certstrap request-cert --ip 127.0.0.1
+certstrap sign --CA "Root CA" 127.0.0.1
+```
+
+#### 4. Values file
 
 Create a `values.yaml` file based on the provided `values.yaml.example`.
 You can check all option available at `./thanos/values.yaml`, as well as
 on the official `prometheus-operator` and `grafana` Helm charts.
 
-#### 4. Install
+#### 5. Install/upgrade
 
 ```sh
-helm install --namespace thanos --name thanos carlos/thanos -f values.yaml \
+helm upgrade --install --namespace thanos --name thanos carlos/thanos -f values.yaml \
   --set-file objectStore=thanos-storage-config.yaml
 ```
 
-##### 4.1 Upgrade when needed
+##### 5.1 Or with TLS
 
 ```sh
-helm upgrade --namespace thanos thanos carlos/thanos -f values.yaml \
+helm upgrade --install --namespace thanos thanos carlos/thanos -f values.yaml \
+  --set-file tls.server.crt=out/example.com.crt \
+  --set-file tls.server.key=out/example.com.key \
+  --set-file tls.client.crt=out/127.0.0.1.crt \
+  --set-file tls.client.key=out/127.0.0.1.key \
+  --set-file tls.client.chain=out/Root_CA.crt \
   --set-file objectStore=thanos-storage-config.yaml
 ```
 
-#### 5. Port-forward services
+#### 6. Port-forward services
 
 You can then port-forward the services you want:
 
@@ -186,9 +202,8 @@ helm upgrade --install --namespace thanos thanos ./thanos \
 - [x] remove peering options (deprecated on thanos 0.4.0+)
 - [x] remove some not very useful options, leave sane defaults
 - [x] servicemonitors for thanos components
-- [x] figure out how to store grafana stuff on an external db
-- [ ] TLS
-  - [ ] improve config
+- [x] TLS
+  - [x] improve config
 - [x] service discovery inside the cluster
 - [x] service discovery across clusters
 - [ ] dynamic prometheus replica label for deduplication

@@ -36,10 +36,10 @@ spec:
             - "--log.level={{ .Values.store.logLevel }}"
             - "--data-dir=/var/thanos/store"
             - "--objstore.config-file=/etc/thanos-object-store/store.yaml"
-            {{- if .Values.store.tlsServer.enabled }}
-            - "--grpc-server-tls-cert=/thanos-tls-server/server.crt"
-            - "--grpc-server-tls-key=/thanos-tls-server/server.key"
-            - "--grpc-server-tls-client-ca=/thanos-tls-server/ca.crt"
+            {{- if .Values.tls.enabled }}
+            - "--grpc-server-tls-cert=/etc/thanos-tls/server.crt"
+            - "--grpc-server-tls-key=/etc/thanos-tls/server.key"
+            - "--grpc-server-tls-client-ca=/etc/thanos-tls/ca.crt"
             {{- end }}
           ports:
             - name: http
@@ -49,12 +49,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/thanos/store
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/thanos-tls
+            {{- end }}
             - name: object-store
               mountPath: /etc/thanos-object-store
-            {{- if .Values.store.tlsServer.enabled }}
-            - name: {{ include "thanos.fullname" . }}-thanos-store-tls-server
-              mountPath: /thanos-tls-server
-            {{- end }}
           resources:
 {{ toYaml .Values.store.resources | indent 12 }}
     {{- with .Values.store.nodeSelector }}
@@ -71,12 +71,12 @@ spec:
     {{- end }}
       volumes:
         - name: data
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ include "thanos.fullname" . }}-thanos-tls
+        {{- end }}
         - name: object-store
           secret:
             secretName: {{ include "thanos.fullname" . }}-thanos-object-store
-      {{- if .Values.store.tlsServer.enabled }}
-        - name: {{ include "thanos.fullname" . }}-thanos-store-tls-server
-          secret:
-            secretName: {{ include "thanos.fullname" . }}-thanos-store-tls-server
-      {{- end }}
 {{- end -}}

@@ -41,17 +41,15 @@ spec:
             - "--store={{ . }}"
             {{- end }}
             - "--query.replica-label={{ .Values.query.queryReplicaLabel }}"
-            {{- if .Values.query.tlsClient.enabled }}
+            {{- if .Values.tls.enabled }}
             - "--grpc-client-tls-secure"
-            - "--grpc-client-tls-cert=/thanos-tls-client/client.crt"
-            - "--grpc-client-tls-key=/thanos-tls-client/client.key"
-            - "--grpc-client-tls-ca=/thanos-tls-client/ca.crt"
-            - "--grpc-client-server-name={{ .Values.query.tlsClient.serverName }}"
-            {{- end }}
-            {{- if .Values.query.tlsServer.enabled }}
-            - "--grpc-server-tls-cert=/thanos-tls-server/server.crt"
-            - "--grpc-server-tls-key=/thanos-tls-server/server.key"
-            - "--grpc-server-tls-client-ca=/thanos-tls-server/ca.crt"
+            - "--grpc-client-tls-cert=/etc/thanos-tls/client.crt"
+            - "--grpc-client-tls-key=/etc/thanos-tls/client.key"
+            - "--grpc-client-server-name={{ .Values.tls.server.name }}"
+            - "--grpc-server-tls-cert=/etc/thanos-tls/server.crt"
+            - "--grpc-server-tls-key=/etc/thanos-tls/server.key"
+            - "--grpc-client-tls-ca=/etc/thanos-tls/ca.crt"
+            - "--grpc-server-tls-client-ca=/etc/thanos-tls/ca.crt"
             {{- end }}
           ports:
             - name: http
@@ -59,13 +57,9 @@ spec:
             - name: grpc
               containerPort: 10901
           volumeMounts:
-            {{- if .Values.query.tlsClient.enabled }}
-            - name: {{ include "thanos.fullname" . }}-thanos-query-tls-client
-              mountPath: /thanos-tls-client
-            {{- end }}
-            {{- if .Values.query.tlsServer.enabled }}
-            - name: {{ include "thanos.fullname" . }}-thanos-query-tls-server
-              mountPath: /thanos-tls-server
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/thanos-tls
             {{- end }}
           livenessProbe:
             httpGet:
@@ -86,14 +80,9 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
-      {{- if .Values.query.tlsClient.enabled }}
-        - name: {{ include "thanos.fullname" . }}-thanos-query-tls-client
-          secret:
-            secretName: {{ include "thanos.fullname" . }}-thanos-query-tls-client
-      {{- end }}
-      {{- if .Values.query.tlsServer.enabled }}
-        - name: {{ include "thanos.fullname" . }}-thanos-query-tls-server
-          secret:
-            secretName: {{ include "thanos.fullname" . }}-thanos-query-tls-server
+      {{- if .Values.tls.enabled }}
+      - name: tls
+        secret:
+          secretName: {{ include "thanos.fullname" . }}-thanos-tls
       {{- end }}
 {{- end -}}

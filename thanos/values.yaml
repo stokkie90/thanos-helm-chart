@@ -46,19 +46,29 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+# tls config for store and query
+tls:
+  enabled: false
+  # CA chain to validate the remote store certificate
+  chain: ""
+  # client side
+  client:
+    # certificate and key for client side authentication to stores
+    crt: ""
+    key: ""
+  # server side
+  server:
+    # certificate and key for client side authentication to stores
+    crt: ""
+    key: ""
+    # (optional) server name indication to the stores (ref: https://tools.ietf.org/html/rfc4366#section-3.1)
+    name: ""
+
 # Thanos store configuration
 store:
   enabled: true
   replicaCount: 1
-
-  logLevel: debug
-
-  # cert, key and ca are base64 encoded strings
-  tlsServer:
-    enabled: false
-    cert: ""
-    key: ""
-    ca: ""
+  logLevel: info
 
   deployment:
     annotations: {}
@@ -101,20 +111,9 @@ query:
     - dnssrv+_grpc._tcp.thanos-sidecar-grpc.thanos.svc.cluster.local
   queryReplicaLabel: replica
 
-  # cert, key and ca are base64 encoded strings
-  tlsClient:
+  ingress:
     enabled: false
-    cert: ""
-    key: ""
-    ca: ""
-    serverName: ""
-
-  # cert, key and ca are base64 encoded strings
-  tlsServer:
-    enabled: false
-    cert: ""
-    key: ""
-    ca: ""
+    domain: example.com
 
   deployment:
     annotations: {}
